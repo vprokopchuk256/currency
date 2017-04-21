@@ -13,7 +13,7 @@ initialResult = Entry { dist = 1.0, prev = "" }
 initial :: Graph.Graph -> String -> Set
 initial graph i =
   let v = filter (i /=) $ Graph.vertices graph
-      l = zip v [emptyResult]
+      l = map (\k -> (k, emptyResult)) v
   in Map.insert i initialResult $ Map.fromList l
 
 relax :: Set -> Edge.Edge -> Set
