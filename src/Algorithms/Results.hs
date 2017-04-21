@@ -1,4 +1,4 @@
-module Algorithms.Results(Set, initial) where
+module Algorithms.Results(Set, initial, relax) where
 
 import qualified Graph.Graph as Graph
 import qualified Graph.Edge as Edge
