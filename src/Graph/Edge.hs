@@ -1,6 +1,6 @@
 module Graph.Edge
 (
-  Edge(from, to, rate, weight)
+  Edge(..)
 , new
 ) where
 
@@ -12,7 +12,5 @@ data Edge = Edge {
 } deriving (Show)
 
 new :: String -> String -> Float -> Edge
-new from to rate =
-  let weight = -1 * log rate
-  in Edge { from = from, to = to, rate = rate, weight = weight }
+new from to rate = Edge { from = from, to = to, rate = rate, weight = - log rate }
 
