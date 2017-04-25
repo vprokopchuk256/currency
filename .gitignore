@@ -1,2 +1,4 @@
 dist
 curr
+.env
+.env_leave
