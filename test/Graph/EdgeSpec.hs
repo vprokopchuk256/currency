@@ -10,5 +10,13 @@ main = hspec spec
 spec :: Spec
 spec = do
   describe "new" $ do
-    it "just works" $ do
-      "to" `shouldBe` "to"
+    let edge = Edge.new "USD" "CHF" 10.0
+
+    it "sets edge props and weight" $ do
+      edge `shouldBe` (Edge.Edge "USD" "CHF" 10.0 (-log 10.0))
+
+  describe "show" $ do
+    let strEdge = show $ Edge.new "USD" "CHF" 10.0
+
+    it "generates proper string representation" $ do
+      strEdge `shouldBe` "USD <- 10.0 <- CHF"

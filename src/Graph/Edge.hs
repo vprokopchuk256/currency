@@ -1,18 +1,20 @@
 module Graph.Edge
-(
-  Edge(from, to, rate, weight)
-, new
-) where
+    ( Edge(..)
+    , new
+    ) where
 
-data Edge = Edge {
-  from :: String,
-  to :: String,
-  rate :: Float,
-  weight :: Float
-} deriving (Show)
+import qualified Data.List as List
+
+data Edge = Edge
+    { from :: String
+    , to :: String
+    , rate :: Float
+    , weight :: Float
+    } deriving (Eq)
+
+instance Show Edge where
+  show (Edge from to rate _) = List.intercalate " <- " [from, show rate, to]
 
 new :: String -> String -> Float -> Edge
-new from to rate =
-  let weight = -1 * log rate
-  in Edge { from = from, to = to, rate = rate, weight = weight }
+new from to rate = Edge { from = from, to = to, rate = rate, weight = - log rate }
 
