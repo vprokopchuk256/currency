@@ -5,18 +5,16 @@ module Graph.Edge
 
 import qualified Data.List as List
 
-import Graph.VertexName
-
-data Edge = Edge
-    { from :: VertexName
-    , to :: VertexName
+data Edge a = Edge
+    { from :: a
+    , to :: a
     , rate :: Float
     , weight :: Float
     } deriving (Eq)
 
-instance Show Edge where
-  show (Edge from to rate _) = List.intercalate " <- " [from, show rate, to]
+instance (Show a) => Show (Edge a) where
+  show (Edge from to rate _) = List.intercalate " <- " [(show from), (show rate), (show to)]
 
-new :: VertexName -> VertexName -> Float -> Edge
+new :: a -> a -> Float -> (Edge a)
 new from to rate = Edge { from = from, to = to, rate = rate, weight = - log rate }
 

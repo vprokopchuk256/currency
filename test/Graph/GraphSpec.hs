@@ -13,7 +13,7 @@ main = hspec spec
 spec :: Spec
 spec = do
   describe "empty graph" $ do
-    let graph = Graph.empty
+    let graph = Graph.empty :: Graph.Graph String
 
     it "has zero size" $ do
       (Graph.size graph) `shouldBe` 0

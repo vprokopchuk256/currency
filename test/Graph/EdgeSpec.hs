@@ -19,4 +19,4 @@ spec = do
     let strEdge = show $ Edge.new "USD" "CHF" 10.0
 
     it "generates proper string representation" $ do
-      strEdge `shouldBe` "USD <- 10.0 <- CHF"
+      strEdge `shouldBe` "\"USD\" <- 10.0 <- \"CHF\""

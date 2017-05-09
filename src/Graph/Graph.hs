@@ -1,33 +1,33 @@
 module Graph.Graph
-    ( empty
+    ( Graph
+    , empty
     , size
     , vertices
     , edges
     , addEdge
     ) where
 
-import qualified Data.Map as Map
+import Data.Hashable
+import qualified Data.HashMap.Strict as Map
 import qualified Data.List as List
 import qualified Graph.Edge as Edge
 
-import Graph.VertexName
+newtype Graph a = Graph
+    { getMap :: Map.HashMap a [Edge.Edge a] }
 
-newtype Graph = Graph
-    { getMap :: Map.Map VertexName [Edge.Edge] }
-
-empty :: Graph
+empty :: Graph a
 empty = Graph Map.empty
 
-size :: Graph -> Int
+size :: (Graph a) -> Int
 size graph = Map.size $ getMap graph
 
-vertices :: Graph -> [VertexName]
+vertices :: Graph a -> [a]
 vertices graph = Map.keys $ getMap graph
 
-edges :: Graph -> [Edge.Edge]
+edges :: Graph a -> [Edge.Edge a]
 edges graph = List.concat $ Map.elems $ getMap graph
 
-addEdge :: VertexName -> VertexName -> Float -> Graph -> Graph
+addEdge :: (Eq a, Hashable a) => a -> a -> Float -> Graph a -> Graph a
 addEdge from to rate (Graph map) =
   let
     edge = Edge.new from to rate
@@ -35,5 +35,5 @@ addEdge from to rate (Graph map) =
   in
     Graph $ (insert from [edge]) . (insert to []) $ map
 
-instance Show Graph where
+instance (Show a) => Show (Graph a) where
   show graph = List.intercalate ", " $ map show $ edges graph
