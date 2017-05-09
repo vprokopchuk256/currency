@@ -19,21 +19,20 @@ empty :: Graph a
 empty = Graph Map.empty
 
 size :: (Graph a) -> Int
-size graph = Map.size $ getMap graph
+size g = Map.size $ getMap g
 
 vertices :: Graph a -> [a]
-vertices graph = Map.keys $ getMap graph
+vertices g = Map.keys $ getMap g
 
 edges :: Graph a -> [Edge.Edge a]
-edges graph = List.concat $ Map.elems $ getMap graph
+edges g = concat $ Map.elems $ getMap g
 
 addEdge :: (Eq a, Hashable a) => a -> a -> Float -> Graph a -> Graph a
-addEdge from to rate (Graph map) =
-  let
-    edge = Edge.new from to rate
-    insert = Map.insertWith (++)
-  in
-    Graph $ (insert from [edge]) . (insert to []) $ map
+addEdge from to rate (Graph g) =
+    Graph $ (f from [e]) . (f to []) $ g
+  where
+    e = Edge.new from to rate
+    f = Map.insertWith (++)
 
 instance (Show a) => Show (Graph a) where
-  show graph = List.intercalate ", " $ map show $ edges graph
+  show g = List.intercalate ", " $ map show $ edges g
