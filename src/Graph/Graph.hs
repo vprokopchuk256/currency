@@ -8,10 +8,10 @@ module Graph.Graph
 
 import qualified Data.Map as Map
 import qualified Data.List as List
-
 import qualified Graph.Edge as Edge
 
-type VertexName = String
+import Graph.VertexName
+
 newtype Graph = Graph
     { getMap :: Map.Map VertexName [Edge.Edge] }
 

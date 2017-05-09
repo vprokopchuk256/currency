@@ -5,9 +5,11 @@ module Graph.Edge
 
 import qualified Data.List as List
 
+import Graph.VertexName
+
 data Edge = Edge
-    { from :: String
-    , to :: String
+    { from :: VertexName
+    , to :: VertexName
     , rate :: Float
     , weight :: Float
     } deriving (Eq)
