@@ -27,7 +27,7 @@ spec = do
                     tree `shouldBe` "\"A\""
 
             context "when has nodes with previous not and distance info" $ do
-                let tree = show $ Relaxable.Tree (Map.fromList [("A", (Just ((Just "B"), 123.45)))])
+                let tree = show $ Relaxable.Tree (Map.fromList [("A", (Just (123.45, Just "B")))])
 
                 it "it returns string with routing information" $ do
                     tree `shouldBe` "\"A\" <- 123.45 <- \"B\""
@@ -44,5 +44,15 @@ spec = do
 
                 it "it returns string with routing information" $ do
                     cycle `shouldBe` "\"A\" <- \"B\" (0.45)"
+
+    describe "fromGraph" $ do
+      let graph = Graph.addEdge "A" "B" 10.0 Graph.empty
+      let tree = Relaxable.fromGraph "A" graph
+
+      it "returns initial tree" $ do
+        tree `shouldBe` Relaxable.Tree (Map.fromList [("A", Just(0.0, Nothing)), ("B", Nothing)])
+
+
+
 
 

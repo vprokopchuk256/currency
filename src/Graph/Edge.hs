@@ -3,7 +3,7 @@ module Graph.Edge
     , new
     ) where
 
-import qualified Data.List as List
+import Data.List
 
 data Edge a = Edge
     { from :: a
@@ -13,8 +13,8 @@ data Edge a = Edge
     } deriving (Eq)
 
 instance (Show a) => Show (Edge a) where
-  show (Edge from to rate _) = List.intercalate " <- " [(show from), (show rate), (show to)]
+  show (Edge from to rate _) = intercalate " <- " [(show from), (show rate), (show to)]
 
 new :: a -> a -> Float -> (Edge a)
-new from to rate = Edge { from = from, to = to, rate = rate, weight = - log rate }
+new from to rate = Edge from to rate (- log rate)
 
