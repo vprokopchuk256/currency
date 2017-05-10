@@ -4,6 +4,7 @@ import Test.Hspec
 
 import qualified Data.HashMap.Strict as Map
 
+import qualified Graph.Edge as Edge
 import qualified Graph.Graph as Graph
 import qualified Graph.Relaxable as Relaxable
 
@@ -46,11 +47,21 @@ spec = do
                     cycle `shouldBe` "\"A\" <- \"B\" (0.45)"
 
     describe "fromGraph" $ do
-      let graph = Graph.addEdge "A" "B" 10.0 Graph.empty
-      let tree = Relaxable.fromGraph "A" graph
+        let graph = Graph.addEdge "A" "B" 10.0 Graph.empty
+        let tree = Relaxable.fromGraph "A" graph
 
-      it "returns initial tree" $ do
-        tree `shouldBe` Relaxable.Tree (Map.fromList [("A", Just(0.0, Nothing)), ("B", Nothing)])
+        it "returns initial tree" $ do
+          tree `shouldBe` Relaxable.Tree (Map.fromList [("A", Just(0.0, Nothing)), ("B", Nothing)])
+
+    describe "relax" $ do
+        context "one edge without cycles" $ do
+            let graph = Graph.addEdge "A" "B" 10.0 Graph.empty
+            let tree = Relaxable.fromGraph "A" graph
+            let edge = Edge.new "A" "B" 10.0
+            let relaxedTree = Relaxable.relax edge tree
+
+            it "returns tree with relaxed edge" $ do
+              relaxedTree `shouldBe` Relaxable.Tree (Map.fromList [("A", Just(0.0, Nothing)), ("B", Just((Edge.weight edge), Just "A"))])
 
 
 
