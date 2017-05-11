@@ -4,7 +4,7 @@ import Test.Hspec
 
 import qualified Data.List as List
 
-import qualified Graph.Edge as Edge
+import Graph.Edge
 import qualified Graph.Graph as Graph
 
 main :: IO ()
@@ -37,7 +37,7 @@ spec = do
       (List.sort (Graph.vertices graph)) `shouldBe` ["CHF", "USD"]
 
     it "has edges list with one just inserted edge" $ do
-      (Graph.edges graph) `shouldBe` [Edge.new "USD" "CHF" 10.0]
+      (Graph.edges graph) `shouldBe` [edge "USD" "CHF" 10.0]
 
   describe "with two connected edges" $ do
     let graph = (Graph.addEdge "USD" "CHF" 10.0) .
@@ -50,4 +50,4 @@ spec = do
       (List.sort (Graph.vertices graph)) `shouldBe` ["CHF", "EUR", "USD"]
 
     it "has edges list with all inserted edges" $ do
-      (Graph.edges graph) `shouldBe` [(Edge.new "CHF" "EUR" 20.0), (Edge.new "USD" "CHF" 10.0)]
+      (Graph.edges graph) `shouldBe` [(edge "CHF" "EUR" 20.0), (edge "USD" "CHF" 10.0)]

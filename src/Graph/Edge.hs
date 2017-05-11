@@ -1,6 +1,6 @@
 module Graph.Edge
     ( Edge(..)
-    , new
+    , edge
     ) where
 
 import Str
@@ -15,6 +15,6 @@ data Edge a = Edge
 instance (Show a) => Show (Edge a) where
   show (Edge from to rate _) = from <-- rate <-- to
 
-new :: a -> a -> Float -> (Edge a)
-new from to rate = Edge from to rate (- log rate)
+edge :: a -> a -> Float -> (Edge a)
+edge from to rate = Edge from to rate (- log rate)
 

@@ -1,6 +1,6 @@
 module Graph.Relaxable
-    ( Relaxable(..)
-    , fromGraph
+    ( Relaxable(Tree, Cycle)
+    , start
     , relax
     ) where
 
@@ -23,8 +23,8 @@ data Relaxable a =
 insert' :: (Eq a, Hashable a) => Float -> Maybe a -> a -> EntryMap a -> EntryMap a
 insert' weight from to mp = Map.insert to (Just (weight, from)) mp
 
-fromGraph :: (Eq a, Hashable a) => a -> Graph a -> Relaxable a
-fromGraph x g = Tree ((init . load) g)
+start :: (Eq a, Hashable a) => a -> Graph a -> Relaxable a
+start x g = Tree ((init . load) g)
   where
     load g = Map.fromList $ map (\x -> (x, Nothing)) (vertices g)
     init = insert' 0.0 Nothing x

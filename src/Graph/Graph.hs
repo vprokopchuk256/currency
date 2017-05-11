@@ -32,7 +32,7 @@ edges = concat.Map.elems.getMap
 addEdge :: (Eq a, Hashable a) => a -> a -> Float -> Graph a -> Graph a
 addEdge from to rate g = Graph ((insertFrom.insertTo.getMap) g)
   where
-    e = new from to rate
+    e = edge from to rate
     insert' = Map.insertWith (++)
     insertFrom = insert' from [e]
     insertTo = insert' to []
