@@ -5,11 +5,12 @@ module Graph.Relaxable
     ) where
 
 import qualified Data.HashMap.Strict as Map
-import Data.List(intercalate)
 import Data.Hashable
+import qualified Debug.Trace as Trace
 
 import Graph.Graph
 import Graph.Edge
+import Str
 
 type Entry a = Maybe (Float, Maybe a)
 type EntryMap a = Map.HashMap a (Entry a)
@@ -28,14 +29,20 @@ fromGraph x g = Tree ((init . load) g)
     load g = Map.fromList $ map (\x -> (x, Nothing)) (vertices g)
     init = insert' 0.0 Nothing x
 
-relax :: (Eq a, Hashable a) => Edge a -> Relaxable a -> Relaxable a
-relax (Edge f t _ w) (Tree mp) = Tree (insert' w (Just f) t mp)
+relax :: (Eq a, Hashable a, Show a) => Edge a -> Relaxable a -> Relaxable a
+relax (Edge from to _ weight) t@(Tree mp) = Tree (ins ((Map.!) mp from) ((Map.!) mp to))
+  where
+    ins Nothing _ = mp
+    ins (Just (weightF, _)) Nothing = insert' (weightF + weight) (Just from) to mp
+    ins (Just (weightF, _)) (Just (weightT, _))
+        | weightF + weight < weightT = insert' (weightF + weight) (Just from) to mp
+        | otherwise = mp
 
 instance (Show a) => Show (Relaxable a) where
-    show (Tree mp) = intercalate ", " $ map f $ Map.toList mp
+    show (Tree mp) = join $ filter (not . null) $ map f $ Map.toList mp
       where
-        f (to, Nothing) = show to
-        f (to, Just (dist, Nothing)) = intercalate " <- " [(show to), (show dist)]
-        f (to, Just (dist, Just from)) = intercalate " <- " [(show to), (show dist), (show from)]
+        f (to, Just (dist, Nothing)) = to <-- dist
+        f (to, Just (dist, Just from)) = to <-- dist <-- from
+        f (to, m) = to <-- m
     show (Cycle [] _) = ""
-    show (Cycle ns p) = (intercalate " <- " $ map show ns) ++ " (" ++ show p ++ ")"
+    show (Cycle ns p) = (foldl (<--) "" ns) ++ " (" ++ str p ++ ")"

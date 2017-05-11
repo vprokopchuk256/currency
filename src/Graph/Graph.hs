@@ -12,6 +12,7 @@ import Data.Hashable
 import qualified Data.HashMap.Strict as Map
 
 import Graph.Edge
+import Str
 
 newtype Graph a = Graph
     { getMap :: Map.HashMap a [Edge a] }
@@ -37,7 +38,4 @@ addEdge from to rate g = Graph ((insertFrom.insertTo.getMap) g)
     insertTo = insert' to []
 
 instance (Show a) => Show (Graph a) where
-    show = intercalate'.show'.edges
-      where
-        intercalate' = intercalate ","
-        show' = map show
+    show = join . edges

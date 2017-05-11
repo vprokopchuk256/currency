@@ -3,7 +3,7 @@ module Graph.Edge
     , new
     ) where
 
-import Data.List
+import Str
 
 data Edge a = Edge
     { from :: a
@@ -13,7 +13,7 @@ data Edge a = Edge
     } deriving (Eq)
 
 instance (Show a) => Show (Edge a) where
-  show (Edge from to rate _) = intercalate " <- " [(show from), (show rate), (show to)]
+  show (Edge from to rate _) = from <-- rate <-- to
 
 new :: a -> a -> Float -> (Edge a)
 new from to rate = Edge from to rate (- log rate)
