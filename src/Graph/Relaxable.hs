@@ -30,13 +30,18 @@ start x g = Tree ((init . load) g)
     init = insert' 0.0 Nothing x
 
 relax :: (Eq a, Hashable a, Show a) => Edge a -> Relaxable a -> Relaxable a
-relax (Edge from to _ weight) t@(Tree mp) = Tree (ins ((Map.!) mp from) ((Map.!) mp to))
+relax (Edge from to _ weight) t@(Tree mp) = ins ((Map.!) mp from) ((Map.!) mp to)
   where
-    ins Nothing _ = mp
-    ins (Just (weightF, _)) Nothing = insert' (weightF + weight) (Just from) to mp
-    ins (Just (weightF, _)) (Just (weightT, _))
-        | weightF + weight < weightT = insert' (weightF + weight) (Just from) to mp
-        | otherwise = mp
+    ins Nothing _ = Tree mp
+    ins (Just (weightF, _)) Nothing = Tree (insert' (weightF + weight) (Just from) to mp)
+    ins (Just (weightF, _)) (Just (weightT, fromT))
+        | isRelaxed && isCycle = Cycle [] 0.0
+        | isRelaxed = Tree (insert' weightN (Just from) to mp)
+        | otherwise = Tree mp
+      where
+        weightN = weightF + weight
+        isRelaxed = weightN < weightT
+        isCycle = (Just from) == fromT
 
 instance (Show a) => Show (Relaxable a) where
     show (Tree mp) = join $ filter (not . null) $ map f $ Map.toList mp
@@ -44,5 +49,5 @@ instance (Show a) => Show (Relaxable a) where
         f (to, Just (dist, Nothing)) = to <-- dist
         f (to, Just (dist, Just from)) = to <-- dist <-- from
         f (to, m) = to <-- m
-    show (Cycle [] _) = ""
+    show (Cycle [] _) = "Empty Cycle"
     show (Cycle ns p) = (foldl (<--) "" ns) ++ " (" ++ str p ++ ")"
