@@ -15,8 +15,7 @@ spec = do
   describe "execute" $ do
     context "with one edge" $ do
       let ab = edge "A" "B" 2.0
-
-      let graph = addEdge "A" "B" 2.0 $ empty
+      let graph = empty <<< ab
       let tree = execute "A" graph
 
       it "return tree" $ do
@@ -25,14 +24,42 @@ spec = do
     context "with two edges rooted in the same vertice" $ do
       let ab = edge "A" "B" 2.0
       let ac = edge "A" "C" 2.0
-      let graph = addEdge "A" "B" 2.0 .
-                  addEdge "A" "C" 2.0 $ empty
+      let graph = empty <<< ab <<< ac
       let tree = execute "A" graph
 
       it "return tree" $ do
         show tree `shouldBe` join ["A" <-- 0.0,
                                    "B" <-- weight ab <-- "A",
                                    "C" <-- weight ac <-- "A"]
+
+    context "with two sequent edges" $ do
+      let ab = edge "A" "B" 2.0
+      let bc = edge "B" "C" 2.0
+      let graph = empty <<< ab <<< bc
+      let tree = execute "A" graph
+
+      it "return tree" $ do
+        show tree `shouldBe` join ["A" <-- 0.0,
+                                   "B" <-- weight ab <-- "A",
+                                   "C" <-- (weight ab + weight bc) <-- "B"]
+
+    context "with simple negative cycle" $ do
+      let ab = edge "A" "B" 2.0
+      let ba = edge "B" "A" 2.0
+      let graph = empty <<< ab <<< ba
+      let tree = execute "A" graph
+
+      it "returns detected cycle" $ do
+        show tree `shouldBe` join ["A" <-- "B"]
+
+    context "with simple non negative cycle" $ do
+      let ab = edge "A" "B" 2.0
+      let ba = edge "B" "A" 0.5
+      let graph = empty <<< ab <<< ba
+      let tree = execute "A" graph
+
+      it "returns detected cycle" $ do
+        show tree `shouldBe` join ["A" <-- 0.0, "B" <-- weight ba <-- "A"]
 
     -- context "integration example" $ do
     --   let graph= addEdge "USD" "USD" 1.000 .

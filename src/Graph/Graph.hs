@@ -4,6 +4,7 @@ module Graph.Graph
     , size
     , vertices
     , edges
+    , (<<<)
     , addEdge
     ) where
 
@@ -29,13 +30,15 @@ vertices = Map.keys.getMap
 edges :: Graph a -> [Edge a]
 edges = concat.Map.elems.getMap
 
-addEdge :: (Eq a, Hashable a) => a -> a -> Float -> Graph a -> Graph a
-addEdge from to rate g = Graph ((insertFrom.insertTo.getMap) g)
+(<<<) :: (Eq a, Hashable a) => Graph a -> Edge a -> Graph a
+g <<< e = Graph ((insertFrom.insertTo.getMap) g)
   where
-    e = edge from to rate
     insert' = Map.insertWith (++)
-    insertFrom = insert' from [e]
-    insertTo = insert' to []
+    insertFrom = insert' (from e) [e]
+    insertTo = insert' (to e) []
+
+addEdge :: (Eq a, Hashable a) => a -> a -> Float -> Graph a -> Graph a
+addEdge from to rate g = g <<< edge from to rate
 
 instance (Show a) => Show (Graph a) where
     show = join . edges
