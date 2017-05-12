@@ -6,7 +6,6 @@ module Graph.Relaxable
 
 import qualified Data.HashMap.Strict as Map
 import Data.Hashable
-import qualified Debug.Trace as Trace
 
 import Graph.Graph
 import Graph.Edge
@@ -17,7 +16,7 @@ type EntryMap a = Map.HashMap a (Entry a)
 
 data Relaxable a =
     Tree (EntryMap a)
-    | Cycle [a] Float
+    | Cycle [a]
     deriving (Eq)
 
 insert' :: (Eq a, Hashable a) => Float -> Maybe a -> a -> EntryMap a -> EntryMap a
@@ -35,13 +34,19 @@ relax (Edge from to _ weight) t@(Tree mp) = ins ((Map.!) mp from) ((Map.!) mp to
     ins Nothing _ = Tree mp
     ins (Just (weightF, _)) Nothing = Tree (insert' (weightF + weight) (Just from) to mp)
     ins (Just (weightF, _)) (Just (weightT, fromT))
-        | isRelaxed && isCycle = Cycle [] 0.0
+        | isRelaxed && isCycle = cycleFrom from (Cycle [])
         | isRelaxed = Tree (insert' weightN (Just from) to mp)
         | otherwise = Tree mp
       where
         weightN = weightF + weight
         isRelaxed = weightN < weightT
         isCycle = (Just from) == fromT
+        cycleFrom f (Cycle vs)
+            | f' == from  = cycle
+            | otherwise = cycleFrom f' cycle
+          where
+            Just (_, Just f') = (Map.!) mp f
+            cycle = Cycle (f':vs)
 
 instance (Show a) => Show (Relaxable a) where
     show (Tree mp) = join $ filter (not . null) $ map f $ Map.toList mp
@@ -49,5 +54,5 @@ instance (Show a) => Show (Relaxable a) where
         f (to, Just (dist, Nothing)) = to <-- dist
         f (to, Just (dist, Just from)) = to <-- dist <-- from
         f (to, m) = to <-- m
-    show (Cycle [] _) = "Empty Cycle"
-    show (Cycle ns p) = (foldl (<--) "" ns) ++ " (" ++ str p ++ ")"
+    show (Cycle []) = "Empty Cycle"
+    show (Cycle ns) = foldl (<--) "" ns

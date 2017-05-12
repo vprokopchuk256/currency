@@ -53,6 +53,4 @@ spec = do
                 let cycle = relax ab . relax ca . relax bc . relax ab $ tree
 
                 it "returns detected cycle" $ do
-                  cycle `shouldBe` Cycle [] 0.0
-
-
+                  cycle `shouldBe` Cycle ["A", "B", "C"]
