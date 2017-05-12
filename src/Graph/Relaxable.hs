@@ -2,6 +2,7 @@ module Graph.Relaxable
     ( Relaxable(Tree, Cycle)
     , start
     , relax
+    , relaxAll
     ) where
 
 import qualified Data.HashMap.Strict as Map
@@ -28,7 +29,7 @@ start x g = Tree ((init . load) g)
     load g = Map.fromList $ map (\x -> (x, Nothing)) (vertices g)
     init = insert' 0.0 Nothing x
 
-relax :: (Eq a, Hashable a, Show a) => Edge a -> Relaxable a -> Relaxable a
+relax :: (Eq a, Hashable a) => Edge a -> Relaxable a -> Relaxable a
 relax (Edge from to _ weight) t@(Tree mp) = ins ((Map.!) mp from) ((Map.!) mp to)
   where
     ins Nothing _ = Tree mp
@@ -47,6 +48,11 @@ relax (Edge from to _ weight) t@(Tree mp) = ins ((Map.!) mp from) ((Map.!) mp to
           where
             Just (_, Just f') = (Map.!) mp f
             cycle = Cycle (f':vs)
+
+relaxAll :: (Eq a, Hashable a) => [Edge a] -> Relaxable a -> Relaxable a
+relaxAll _ c@(Cycle _) = c
+relaxAll [] t = t
+relaxAll (e:es) t = relaxAll es $ relax e t
 
 instance (Show a) => Show (Relaxable a) where
     show (Tree mp) = join $ filter (not . null) $ map f $ Map.toList mp
