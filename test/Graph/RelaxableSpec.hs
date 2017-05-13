@@ -46,15 +46,6 @@ spec = do
                                                       "B" <-- weight ab0 <-- "A",
                                                       "C" <-- "Nothing"]
 
-            context "and negative cycle detected" $ do
-                let ab = edge "A" "B" 3.0
-                let bc = edge "B" "C" 3.0
-                let ca = edge "C" "A" 3.0
-                let cycle = relax ab . relax ca . relax bc . relax ab $ tree
-
-                it "returns detected cycle" $ do
-                  cycle `shouldBe` Cycle ["C", "A", "B", "C"]
-
     describe "relaxAll" $ do
         context "without cycles" $ do
           let cb = edge "C" "B" 5.0
@@ -67,11 +58,24 @@ spec = do
                                                 "B" <-- (weight ac + weight cb)  <-- "C",
                                                 "C" <-- weight ac <-- "A" ]
 
-          context "and negative cycle detected" $ do
-              let ab = edge "A" "B" 3.0
-              let bc = edge "B" "C" 3.0
-              let ca = edge "C" "A" 3.0
-              let cycle = relaxAll [ab, bc, ca, ab] tree
+    describe "detectCycle" $ do
+        context "without cycles" $ do
+          let cb = edge "C" "B" 5.0
+          let ac = edge "A" "C" 3.0
+          let ab = edge "A" "B" 3.0
+          let relaxedTree = relaxAll [ab, ac, cb] tree
+          let relaxed = detectCycle [ab, ac, cb] relaxedTree
 
-              it "returns detected cycle" $ do
-                cycle `shouldBe` Cycle ["C", "A", "B", "C"]
+          it "returns tree with all specified edges relaxed" $ do
+              relaxed `shouldBe` relaxedTree
+
+        context "and negative cycle detected" $ do
+            let ab = edge "A" "B" 3.0
+            let bc = edge "B" "C" 3.0
+            let ca = edge "C" "A" 3.0
+            let relaxedTree = relaxAll [ab, bc, ca] tree
+
+            let relaxed = detectCycle [ab, bc, ca] relaxedTree
+
+            it "returns detected cycle" $ do
+              relaxed `shouldBe` Cycle ["C", "A", "B", "C"]

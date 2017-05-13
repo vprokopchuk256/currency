@@ -3,6 +3,7 @@ module Graph.Relaxable
     , start
     , relax
     , relaxAll
+    , detectCycle
     ) where
 
 import Data.HashMap.Strict(HashMap, insert, fromList, toList, (!))
@@ -29,19 +30,32 @@ start x g = Tree ((init . load) g)
     load g = fromList $ map (\x -> (x, Nothing)) (vertices g)
     init = insert' 0.0 Nothing x
 
-relax :: (Eq a, Hashable a, Show a) => Edge a -> Relaxable a -> Relaxable a
+relax :: (Eq a, Hashable a) => Edge a -> Relaxable a -> Relaxable a
 relax (Edge from to _ weight) t@(Tree mp) = ins (mp ! from) (mp ! to)
   where
     ins Nothing _ = Tree mp
     ins (Just (weightF, _)) Nothing = Tree (insert' (weightF + weight) (Just from) to mp)
     ins (Just (weightF, _)) (Just (weightT, fromT))
-        | isRelaxed && isCycle = cycleFrom from (Cycle [])
         | isRelaxed = Tree (insert' weightN (Just from) to mp)
         | otherwise = Tree mp
       where
         weightN = weightF + weight
         isRelaxed = weightN < weightT
-        isCycle = (Just from) == fromT
+
+relaxAll :: (Eq a, Hashable a) => [Edge a] -> Relaxable a -> Relaxable a
+relaxAll _ c@(Cycle _) = c
+relaxAll [] t = t
+relaxAll (e:es) t = relaxAll es $ relax e t
+
+tryRelax :: (Eq a, Hashable a) => Edge a -> Relaxable a -> Relaxable a
+tryRelax (Edge from to _ weight) (Tree mp) = ins (mp ! from) (mp ! to)
+  where
+    ins (Just (weightF, _)) (Just (weightT, _))
+        | isRelaxed = cycleFrom from (Cycle [])
+        | otherwise = Tree mp
+      where
+        weightN = weightF + weight
+        isRelaxed = weightN < weightT
         cycleFrom f (Cycle vs)
             | elem f' vs = cycle
             | otherwise = cycleFrom f' cycle
@@ -49,10 +63,10 @@ relax (Edge from to _ weight) t@(Tree mp) = ins (mp ! from) (mp ! to)
             Just (_, Just f') = mp ! f
             cycle = Cycle (f':vs)
 
-relaxAll :: (Eq a, Hashable a, Show a) => [Edge a] -> Relaxable a -> Relaxable a
-relaxAll _ c@(Cycle _) = c
-relaxAll [] t = t
-relaxAll (e:es) t = relaxAll es $ relax e t
+detectCycle :: (Eq a, Hashable a, Show a) => [Edge a] -> Relaxable a -> Relaxable a
+detectCycle _ c@(Cycle _) = c
+detectCycle [] t = t
+detectCycle (e:es) t = detectCycle es $ tryRelax e t
 
 instance (Show a) => Show (Relaxable a) where
     show (Tree mp) = join $ filter (not . null) $ map f $ toList mp
