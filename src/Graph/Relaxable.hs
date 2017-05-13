@@ -1,7 +1,6 @@
 module Graph.Relaxable
     ( Relaxable(Tree, Cycle)
     , start
-    , relax
     , relaxAll
     , detectCycle
     ) where
