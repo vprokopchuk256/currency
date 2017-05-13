@@ -53,7 +53,7 @@ spec = do
                 let cycle = relax ab . relax ca . relax bc . relax ab $ tree
 
                 it "returns detected cycle" $ do
-                  cycle `shouldBe` Cycle ["A", "B", "C"]
+                  cycle `shouldBe` Cycle ["C", "A", "B", "C"]
 
     describe "relaxAll" $ do
         context "without cycles" $ do
@@ -74,4 +74,4 @@ spec = do
               let cycle = relaxAll [ab, bc, ca, ab] tree
 
               it "returns detected cycle" $ do
-                cycle `shouldBe` Cycle ["A", "B", "C"]
+                cycle `shouldBe` Cycle ["C", "A", "B", "C"]
