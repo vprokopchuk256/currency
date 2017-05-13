@@ -63,7 +63,7 @@ tryRelax (Edge from to _ weight) (Tree mp) = ins (mp ! from) (mp ! to)
             Just (_, Just f') = mp ! f
             cycle = Cycle (f':vs)
 
-detectCycle :: (Eq a, Hashable a, Show a) => [Edge a] -> Relaxable a -> Relaxable a
+detectCycle :: (Eq a, Hashable a) => [Edge a] -> Relaxable a -> Relaxable a
 detectCycle _ c@(Cycle _) = c
 detectCycle [] t = t
 detectCycle (e:es) t = detectCycle es $ tryRelax e t
