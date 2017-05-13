@@ -29,8 +29,8 @@ start x g = Tree ((init . load) g)
     load g = fromList $ map (\x -> (x, Nothing)) (vertices g)
     init = insert' 0.0 Nothing x
 
-relax' :: (Eq a, Hashable a) => Edge a -> Relaxable a -> Relaxable a
-relax' (Edge from to _ weight) t@(Tree mp) = ins (mp ! from) (mp ! to)
+relax' :: (Eq a, Hashable a) => Relaxable a -> Edge a -> Relaxable a
+relax' (Tree mp) (Edge from to _ weight) = ins (mp ! from) (mp ! to)
   where
     ins Nothing _ = Tree mp
     ins (Just (weightF, _)) Nothing = Tree (insert' (weightF + weight) (Just from) to mp)
@@ -42,9 +42,7 @@ relax' (Edge from to _ weight) t@(Tree mp) = ins (mp ! from) (mp ! to)
         isRelaxed = weightN < weightT
 
 relax :: (Eq a, Hashable a) => [Edge a] -> Relaxable a -> Relaxable a
-relax _ c@(Cycle _) = c
-relax [] t = t
-relax (e:es) t = relax es $ relax' e t
+relax es t = foldl relax' t es
 
 tryRelax :: (Eq a, Hashable a) => Edge a -> Relaxable a -> Relaxable a
 tryRelax (Edge from to _ weight) (Tree mp) = ins (mp ! from) (mp ! to)
