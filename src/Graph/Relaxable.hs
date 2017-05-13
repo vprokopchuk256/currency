@@ -42,7 +42,7 @@ relax' (Tree mp) (Edge from to _ weight) = ins (mp ! from) (mp ! to)
         isRelaxed = weightN < weightT
 
 relax :: (Eq a, Hashable a) => Relaxable a -> [Edge a] -> Relaxable a
-relax t es = foldl relax' t es
+relax = foldl relax'
 
 tryRelax :: (Eq a, Hashable a) => Edge a -> Relaxable a -> Relaxable a
 tryRelax (Edge from to _ weight) (Tree mp) = ins (mp ! from) (mp ! to)
