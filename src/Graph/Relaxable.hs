@@ -1,8 +1,7 @@
 module Graph.Relaxable
     ( Relaxable(Tree, Cycle)
-    , start
+    , tree
     , relax
-    , relaxAll
     , detectCycle
     ) where
 
@@ -24,49 +23,44 @@ data Relaxable a =
 insert' :: (Eq a, Hashable a) => Float -> Maybe a -> a -> EntryMap a -> EntryMap a
 insert' weight from to mp = insert to (Just (weight, from)) mp
 
-start :: (Eq a, Hashable a) => a -> Graph a -> Relaxable a
-start x g = Tree ((init . load) g)
+tree :: (Eq a, Hashable a) => a -> Graph a -> Relaxable a
+tree x g = Tree ((init . load) g)
   where
     load g = fromList $ map (\x -> (x, Nothing)) (vertices g)
     init = insert' 0.0 Nothing x
 
-relax :: (Eq a, Hashable a) => Edge a -> Relaxable a -> Relaxable a
-relax (Edge from to _ weight) t@(Tree mp) = ins (mp ! from) (mp ! to)
+cycle' :: (Eq a, Hashable a) => a -> Relaxable a -> Relaxable a
+cycle' x (Tree mp) = cycleFrom x (Cycle [])
   where
-    ins Nothing _ = Tree mp
-    ins (Just (weightF, _)) Nothing = Tree (insert' (weightF + weight) (Just from) to mp)
-    ins (Just (weightF, _)) (Just (weightT, fromT))
-        | isRelaxed = Tree (insert' weightN (Just from) to mp)
-        | otherwise = Tree mp
+    cycleFrom f (Cycle vs)
+        | elem f' vs = c
+        | otherwise = cycleFrom f' c
       where
-        weightN = weightF + weight
-        isRelaxed = weightN < weightT
+        Just (_, Just f') = mp ! f
+        c = Cycle (f':vs)
 
-relaxAll :: (Eq a, Hashable a) => [Edge a] -> Relaxable a -> Relaxable a
-relaxAll _ c@(Cycle _) = c
-relaxAll [] t = t
-relaxAll (e:es) t = relaxAll es $ relax e t
-
-tryRelax :: (Eq a, Hashable a) => Edge a -> Relaxable a -> Relaxable a
-tryRelax (Edge from to _ weight) (Tree mp) = ins (mp ! from) (mp ! to)
+relaxEdge :: (Eq a, Hashable a) => Relaxable a -> Edge a -> Maybe (Relaxable a)
+relaxEdge (Tree mp) (Edge from to _ weight) = ins (mp ! from) (mp ! to)
   where
+    ins Nothing _ = Nothing
+    ins (Just (weightF, _)) Nothing = Just (Tree (insert' (weightF + weight) (Just from) to mp))
     ins (Just (weightF, _)) (Just (weightT, _))
-        | isRelaxed = cycleFrom from (Cycle [])
-        | otherwise = Tree mp
+        | weightN < weightT = Just (Tree (insert' weightN (Just from) to mp))
+        | otherwise = Nothing
       where
         weightN = weightF + weight
-        isRelaxed = weightN < weightT
-        cycleFrom f (Cycle vs)
-            | elem f' vs = cycle
-            | otherwise = cycleFrom f' cycle
-          where
-            Just (_, Just f') = mp ! f
-            cycle = Cycle (f':vs)
+
+relax :: (Eq a, Hashable a) => Relaxable a -> [Edge a] -> Relaxable a
+relax = foldl relaxEdge'
+  where
+    relaxEdge' t e = maybe t id $ relaxEdge t e
 
 detectCycle :: (Eq a, Hashable a) => [Edge a] -> Relaxable a -> Relaxable a
 detectCycle _ c@(Cycle _) = c
 detectCycle [] t = t
-detectCycle (e:es) t = detectCycle es $ tryRelax e t
+detectCycle (e:es) t = detectCycle es $ relaxEdge' t e
+  where
+    relaxEdge' t e@(Edge from _ _ _) = maybe t (\t' -> cycle' from t) $ relaxEdge t e
 
 instance (Show a) => Show (Relaxable a) where
     show (Tree mp) = join $ filter (not . null) $ map f $ toList mp
