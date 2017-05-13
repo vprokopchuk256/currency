@@ -19,7 +19,7 @@ spec = do
         context "one edge without cycles" $ do
             it "returns tree with relaxed edge is provided first time" $ do
                 let ab = edge "A" "B" 3.0
-                let relaxedTree = relax [ab] tree
+                let relaxedTree = relax tree [ab]
 
                 show relaxedTree `shouldBe` join ["A" <-- 0.0,
                                                   "B" <-- weight ab <-- "A",
@@ -29,7 +29,7 @@ spec = do
             let cb = edge "C" "B" 5.0
             let ac = edge "A" "C" 3.0
             let ab = edge "A" "B" 3.0
-            let relaxedTree = relax [ab, ac, cb] tree
+            let relaxedTree = relax tree [ab, ac, cb]
 
             it "returns tree with edge relaxed one more time" $ do
                 show relaxedTree `shouldBe` join ["A" <-- 0.0,
@@ -39,7 +39,7 @@ spec = do
         context "and when longer edge is specified" $ do
             let ab0 = edge "A" "B" 3.0
             let ab1 = edge "A" "B" 2.0
-            let relaxedTree = relax [ab0, ab1] tree
+            let relaxedTree = relax tree [ab0, ab1]
 
             it "returns non modified tree" $ do
                 show relaxedTree `shouldBe` join ["A" <-- 0.0,
@@ -50,7 +50,7 @@ spec = do
           let cb = edge "C" "B" 5.0
           let ac = edge "A" "C" 3.0
           let ab = edge "A" "B" 3.0
-          let relaxedTree = relax [ab, ac, cb] tree
+          let relaxedTree = relax tree [ab, ac, cb]
 
           it "returns tree with all specified edges relaxed" $ do
               show relaxedTree `shouldBe` join ["A" <-- 0.0,
@@ -62,7 +62,7 @@ spec = do
           let cb = edge "C" "B" 5.0
           let ac = edge "A" "C" 3.0
           let ab = edge "A" "B" 3.0
-          let relaxedTree = relax [ab, ac, cb] tree
+          let relaxedTree = relax tree [ab, ac, cb]
           let relaxed = detectCycle [ab, ac, cb] relaxedTree
 
           it "returns tree with all specified edges relaxed" $ do
@@ -72,7 +72,7 @@ spec = do
             let ab = edge "A" "B" 3.0
             let bc = edge "B" "C" 3.0
             let ca = edge "C" "A" 3.0
-            let relaxedTree = relax [ab, bc, ca] tree
+            let relaxedTree = relax tree [ab, bc, ca]
 
             let relaxed = detectCycle [ab, bc, ca] relaxedTree
 
