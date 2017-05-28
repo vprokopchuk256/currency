@@ -4,4 +4,5 @@ import qualified Net.FixerIO            as Fixer
 
 main = do
   rates <- Fixer.rates ["USD", "EUR", "GBP"]
-  putStrLn $ show rates
+  let g = Graph.load rates
+  putStrLn $ show g

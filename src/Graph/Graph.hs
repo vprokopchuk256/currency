@@ -4,6 +4,7 @@ module Graph.Graph
     , size
     , vertices
     , edges
+    , load
     , (<<<)
     , addEdge
     ) where
@@ -29,6 +30,11 @@ vertices = Map.keys.getMap
 
 edges :: Graph a -> [Edge a]
 edges = concat.Map.elems.getMap
+
+load :: (Eq a, Hashable a) => [(a, a, Float)] -> Graph a
+load = foldl addTriple empty
+  where
+    addTriple g (from, to, rate) = addEdge from to rate g
 
 (<<<) :: (Eq a, Hashable a) => Graph a -> Edge a -> Graph a
 g <<< e = Graph ((insertFrom.insertTo.getMap) g)

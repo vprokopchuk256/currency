@@ -51,3 +51,9 @@ spec = do
 
     it "has edges list with all inserted edges" $ do
       (Graph.edges graph) `shouldBe` [(edge "CHF" "EUR" 20.0), (edge "USD" "CHF" 10.0)]
+
+  describe "load" $ do
+    let graph = Graph.load [("USD", "CHF", 10.0), ("CHF", "EUR", 20.0)]
+
+    it "has edges list with all loaded edges" $ do
+      (Graph.edges graph) `shouldBe` [(edge "CHF" "EUR" 20.0), (edge "USD" "CHF" 10.0)]
