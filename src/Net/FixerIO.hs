@@ -1,14 +1,15 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Net.FixerIO(rates) where
 
-import           Data.Aeson            (Value)
-import qualified Data.ByteString as B
+import           Data.Scientific
+import qualified Data.Text             as T
+import           Data.Aeson
+import qualified Data.ByteString       as B
 import           Network.HTTP.Simple
+import           Data.HashMap.Strict(toList, (!))
 
 
-req :: B.ByteString -> [B.ByteString] -> Request
-req base symbols =
+request :: B.ByteString -> [B.ByteString] -> Request
+request base symbols =
     setRequestMethod "GET" .
     setRequestHost "api.fixer.io" .
     setRequestPath "latest" .
@@ -17,8 +18,17 @@ req base symbols =
     base' = Just base
     symbols' = Just (B.intercalate "," symbols)
 
+extractRates :: Value -> [(T.Text, T.Text, Float)]
+extractRates (Object v) =
+    triples $ v ! "rates"
+  where
+    triples (Object o) = map triple $ toList o
+    triple (k, n) = (base, k, toFloat n)
+    base = toText $ v ! "base"
+    toText (String t) = t
+    toFloat (Number n) = toRealFloat n
 
-rates :: B.ByteString -> [B.ByteString] -> IO Value
+rates :: B.ByteString -> [B.ByteString] -> IO [(T.Text, T.Text, Float)]
 rates base symbols = do
-  response <- httpJSON (req base symbols)
-  return $ getResponseBody response
+  response <- httpJSON (request base symbols)
+  return $ extractRates $ getResponseBody response
