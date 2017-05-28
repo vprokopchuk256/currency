@@ -1,14 +1,14 @@
 module Net.FixerIO(rates) where
 
-import           Data.Scientific
-import qualified Data.Text             as T
-import           Data.Aeson
-import qualified Data.ByteString       as B
+import           Data.Scientific       (toRealFloat)
+import           Data.Text             (Text)
+import           Data.Aeson            (Value(..))
+import           Data.ByteString       (ByteString, intercalate)
 import           Network.HTTP.Simple
-import           Data.HashMap.Strict(toList, (!))
+import           Data.HashMap.Strict   (toList, (!))
 
 
-request :: B.ByteString -> [B.ByteString] -> Request
+request :: ByteString -> [ByteString] -> Request
 request base symbols =
     setRequestMethod "GET" .
     setRequestHost "api.fixer.io" .
@@ -16,9 +16,9 @@ request base symbols =
     setRequestQueryString [("base", base'), ("symbols", symbols')] $ defaultRequest
   where
     base' = Just base
-    symbols' = Just (B.intercalate "," symbols)
+    symbols' = Just (intercalate "," symbols)
 
-extractRates :: Value -> [(T.Text, T.Text, Float)]
+extractRates :: Value -> [(Text, Text, Float)]
 extractRates (Object v) =
     triples $ v ! "rates"
   where
@@ -28,7 +28,10 @@ extractRates (Object v) =
     toText (String t) = t
     toFloat (Number n) = toRealFloat n
 
-rates :: B.ByteString -> [B.ByteString] -> IO [(T.Text, T.Text, Float)]
-rates base symbols = do
-  response <- httpJSON (request base symbols)
-  return $ extractRates $ getResponseBody response
+rates :: [ByteString] -> IO [(Text, Text, Float)]
+rates symbols = concat <$> sequence [ratesFor base | base <- symbols]
+  where
+    ratesFor base = do
+      response <- httpJSON (request base symbols)
+      return $ extractRates $ getResponseBody response
+

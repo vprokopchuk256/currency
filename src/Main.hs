@@ -3,5 +3,5 @@ import qualified Algorithms.BellmanFord as BellmanFord
 import qualified Net.FixerIO            as Fixer
 
 main = do
-  rates <- Fixer.rates "USD" ["USD", "EUR", "GBP"]
+  rates <- Fixer.rates ["USD", "EUR", "GBP"]
   putStrLn $ show rates
